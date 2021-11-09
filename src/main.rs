@@ -1,31 +1,5 @@
 use std::io::Write;
 
-pub fn print_v8(v : &Vec<u8>) {
-    for i in 0..v.len() {
-        if i % 8 == 0 {
-            println!();
-        }
-
-        print!("{:08b} ", v[i]);
-    }
-
-    println!();
-    println!();
-}
-
-pub fn print_v32(v : &Vec<u32>) {
-    for i in 0..v.len() {
-        if i % 2 == 0 {
-            println!();
-        }
-
-        print!("{:032b} ", v[i]);
-    }
-
-    println!();
-    println!();
-}
-
 pub fn right_rotate(x : u32, n : i32) -> u32 {
     let temp : u32 = x << (32 - n);
 
@@ -33,14 +7,14 @@ pub fn right_rotate(x : u32, n : i32) -> u32 {
 }
 
 pub fn sha256(input_bytes : &[u8]) -> String {
-    let mut H0 : u32 = 0x6a09e667;
-    let mut H1 : u32 = 0xbb67ae85;
-    let mut H2 : u32 = 0x3c6ef372;
-    let mut H3 : u32 = 0xa54ff53a;
-    let mut H4 : u32 = 0x510e527f;
-    let mut H5 : u32 = 0x9b05688c;
-    let mut H6 : u32 = 0x1f83d9ab;
-    let mut H7 : u32 = 0x5be0cd19;
+    let mut h0 : u32 = 0x6a09e667;
+    let mut h1 : u32 = 0xbb67ae85;
+    let mut h2 : u32 = 0x3c6ef372;
+    let mut h3 : u32 = 0xa54ff53a;
+    let mut h4 : u32 = 0x510e527f;
+    let mut h5 : u32 = 0x9b05688c;
+    let mut h6 : u32 = 0x1f83d9ab;
+    let mut h7 : u32 = 0x5be0cd19;
 
     const K : [u32; 64] = [
         0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -61,14 +35,9 @@ pub fn sha256(input_bytes : &[u8]) -> String {
 
     bytes.extend_from_slice(input_bytes);
 
-    print_v8(&bytes);
-
     // how many bytes to reach a mult of 64 (512 bits)
     
     let to_reach_k64 = 64 - input_bytes.len() % 64;
-
-    println!("len = {}", input_bytes.len());
-    println!("to_reach_k64 = {}", to_reach_k64);
 
     // if more that 8 bytes (64 bits) everythin ok else we add an aditional 64 bytes (512 bits)
 
@@ -83,13 +52,9 @@ pub fn sha256(input_bytes : &[u8]) -> String {
         bytes.resize(input_bytes.len() + to_reach_k64 + 64, 0);
     }
 
-    print_v8(&bytes);
-
     // change the special bit
     
     bytes[input_bytes.len()] |= 0b10000000;
-
-    print_v8(&bytes);
 
     let bytes_len = bytes.len();
     let input_bits = input_bytes.len() * 8;
@@ -97,13 +62,9 @@ pub fn sha256(input_bytes : &[u8]) -> String {
     for i in 0..8 {
         bytes[bytes_len - i - 1] = (input_bits >> (i * 8)) as u8;
     }
-
-    print_v8(&bytes);
-
-    // chunk block
     
-    println!("len bytes: {}", bytes.len());
-
+    // for each chunk block
+       
     let mut n = 0;
 
     while n < bytes.len() {
@@ -124,26 +85,22 @@ pub fn sha256(input_bytes : &[u8]) -> String {
             w[j] = data;
         }
 
-        print_v32(&w);
-
         for i in 16..64 {
             let s0 = right_rotate(w[i - 15], 7) ^ right_rotate(w[i - 15], 18) ^ (w[i - 15] >> 3);
             let s1 = right_rotate(w[i - 2], 17) ^ right_rotate(w[i - 2], 19) ^ (w[i - 2] >> 10);
             w[i] = w[i - 16] + s0 + w[i - 7] + s1;
         }
 
-        print_v32(&w);
-
         // compression
 
-        let mut a = H0;
-        let mut b = H1;
-        let mut c = H2;
-        let mut d = H3;
-        let mut e = H4;
-        let mut f = H5;
-        let mut g = H6;
-        let mut h = H7;
+        let mut a = h0;
+        let mut b = h1;
+        let mut c = h2;
+        let mut d = h3;
+        let mut e = h4;
+        let mut f = h5;
+        let mut g = h6;
+        let mut h = h7;
 
         for i in 0..64 {
             let s1 = right_rotate(e, 6) ^ right_rotate(e, 11) ^ right_rotate(e, 25);
@@ -164,20 +121,20 @@ pub fn sha256(input_bytes : &[u8]) -> String {
 
         // modify hash values
 
-        H0 += a;
-        H1 += b;
-        H2 += c;
-        H3 += d;
-        H4 += e;
-        H5 += f;
-        H6 += g;
-        H7 += h;
+        h0 += a;
+        h1 += b;
+        h2 += c;
+        h3 += d;
+        h4 += e;
+        h5 += f;
+        h6 += g;
+        h7 += h;
 
         n += 64;
     }
 
-    format!("{:x}{:x}{:x}{:x}{:x}{:x}{:x}{:x}", H0, H1, H2, H3, H4, H5, H6, H7)
-} 
+    format!("{:x}{:x}{:x}{:x}{:x}{:x}{:x}{:x}", h0, h1, h2, h3, h4, h5, h6, h7)
+}
 
 fn main() {
     print!("Enter input: ");
