@@ -10,9 +10,8 @@ fn main() {
 
     std::io::stdin().read_line(&mut input).expect("Input failed");
 
-    let bytes = input[0..input.len() - 1].as_bytes();
+    let bytes = input[0..input.len() - 2].as_bytes();
 
     let hash = sha::sha256(bytes);
-
-    println!("Hash: {}", hash);
+    println!("Hash: {}", hash.to_string());
 }

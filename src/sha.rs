@@ -1,10 +1,24 @@
+pub struct Sha256 {
+    pub bytes: [u32; 8]
+}
+
+impl Sha256 {
+    pub fn to_string(&self) -> String {
+        let mut result = String::new();
+        for byte in self.bytes.iter() {
+            result.push_str(&format!("{:08x}", byte));
+        }
+        result
+    }
+}
+
 fn right_rotate(x : u32, n : i32) -> u32 {
     let temp : u32 = x << (32 - n);
 
     (x >> n) | temp
 }
 
-pub fn sha256(input_bytes : &[u8]) -> String {
+pub fn sha256(input_bytes : &[u8]) -> Sha256 {
     let mut h0 : u32 = 0x6a09e667;
     let mut h1 : u32 = 0xbb67ae85;
     let mut h2 : u32 = 0x3c6ef372;
@@ -131,5 +145,7 @@ pub fn sha256(input_bytes : &[u8]) -> String {
         n += 64;
     }
 
-    format!("{:x}{:x}{:x}{:x}{:x}{:x}{:x}{:x}", h0, h1, h2, h3, h4, h5, h6, h7)
+    Sha256 {
+        bytes: [h0, h1, h2, h3, h4, h5, h6, h7]
+    }
 }
